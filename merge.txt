@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector <int > a;
+
+int inv = 0;
+int n, m;
+
+void merge (int l, int mid, int r) {
+    int n1 = mid - l;
+    int it1 = 0;
+    int it2 = 0;
+    vector <int > res(r - l);
+    while (l + it1 < mid && mid + it2 < r) {
+        if (a[l + it1] <= a[mid + it2]) {
+            res[it1 + it2] = a[l + it1];
+            ++it1;
+        } else {
+            res[it1 + it2] = a[mid + it2];
+            ++it2;
+            inv += (n1 - it1);
+        }
+    }
+    while (l + it1 < mid) {
+        res[it1 + it2] = a[l + it1];
+        ++it1;
+    }
+    while (mid + it2 < r) {
+        res[it1 + it2] = a[mid + it2];
+        ++it2;
+    }
+    for (int i = 0; i < it1 + it2; ++i) {
+        a[l + i] = res[i];
+    }
+}
+
+void _sort (int l, int r) {
+    if (l + 1 >= r) {
+        return;
+    }
+    int mid = l + (r - l) / 2;
+    _sort (l, mid);
+    _sort (mid, r);
+    merge (l, mid, r);
+}
+
+void print () {
+    for (auto t : a) {
+        cout << t << ' ';
+    }
+    cout << "\nInv: " << inv << '\n';
+}
+
+void solve () {
+    cin >> n >> m;
+    a.resize (n);
+    for (auto &in : a) {
+        cin >> in;
+    }
+    _sort (0, n);
+    while (m--) {
+        int type;
+        cin >> type;
+        if (type) {
+            int L, R;
+            cin >> L >> R;
+            --L, --R;
+            if (a[L] < a[R]) {
+                inv += (R - L);
+            } else {
+                if (a[L] > a[R]) {
+                    inv += (R - L - 1);
+                }
+            }
+        } else {
+            cout << inv << '\n';
+        }
+    }
+}
+
+int main () {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    solve ();
+}

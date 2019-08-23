@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+constexpr int N = 1013;
+
+vector <int > parent(2 * N), sz(2 * N);
+
+struct Edge {
+    int u, v, w;
+};
+
+Edge edges[N * (N + 1)];
+
+int get(int v) {
+    if (parent[v] == v) {
+        return v;
+    }
+    parent[v] = get(parent[v]);
+    return parent[v];
+}
+
+bool merge(int u, int v) {
+    u = get(u);
+    v = get(v);
+    if (u == v) {
+        return false;
+    }
+    if (sz[u] > sz[v]) {
+        swap(u, v);
+    }
+    parent[u] = v;
+    sz[v] += sz[u];
+    return true;
+}
+
+int a, m = 0;
+int n;
+long long ans = 0;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    cin >> n;
+    for (int i = 0; i < 2 * n; ++i) {
+        parent[i] = i;
+        sz[i] = 1;
+    }
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            cin >> a;
+            if (j > i) {
+                edges[m++] = {i, j, a};
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        cin >> a;
+        edges[m++] = {n, i, a};
+    }
+    sort(edges, edges + m, [](Edge e1, Edge e2) { return e1.w < e2.w; });
+    for (int i = 0; i < m; i++) {
+        if (merge(edges[i].u, edges[i].v)) {
+            ans += edges[i].w;
+        }
+    }
+    cout << ans;
+}

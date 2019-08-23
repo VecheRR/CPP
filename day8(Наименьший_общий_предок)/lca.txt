@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+
+#define begin {
+#define end }
+
+using namespace std;
+using Vec = vector <int >;
+using Graph = vector <Vec >;
+using Matrix = vector <Vec >;
+
+int n, m;
+int u, v;
+int timer = 0;
+Vec tin, tout;
+Matrix dp;
+Graph gr;
+
+
+void run();
+void dfs(int v, int par);
+void resize();
+bool check();
+int lca();
+
+int main () {
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    run();
+}
+
+void run() {
+    resize();
+    cin >> n;
+    while (--n) begin
+        cin >> u >> v;
+    end
+    cin >> m;
+    while (m--) begin
+        cin >> u >> v;
+    end
+    dfs(u, v);
+}
+
+void dfs(int v, int par) {
+    tin[v] = timer++;
+    dp[v][0] = par;
+    for (int i = 1; i < dp[v].size(); ++i) begin
+        dp[v][i] = dp[dp[v][i - 1]][i - 1];
+    end
+    for (auto u : gr[v]) begin
+        if (u != par) begin
+            dfs(u, v);
+        end
+    end
+    tout[v] = timer++;
+}
+
+void resize() {
+    dp.assign(n, vector <int > (30, 0));
+    tin.assign(n, 0);
+    tout.assign(n, 0);
+    gr.resize(n);
+}
+
+bool check() {
+    return (tin[u] <= tin[v] && tout[v] <= tout[u]);
+}
+
+int lca() {
+
+}

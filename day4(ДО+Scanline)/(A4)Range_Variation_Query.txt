@@ -1,0 +1,77 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+constexpr int N = 100013;
+constexpr int INF = INT32_MAX;
+
+int mn[4 * N], mx[4 * N], a[N];
+int k;
+
+void build(int id, int L, int R){
+    if(R - L == 1){
+        mn[id] = a[L];
+        mx[id] = a[L];
+        return;
+    }
+    int m = (R + L) / 2;
+    build(id * 2 + 1, L, m);
+    build(id * 2 + 2, m, R);
+    mx[id] = max(mx[id * 2 + 1], mx[id * 2 + 2]);
+    mn[id] = min(mn[id * 2 + 1], mn[id * 2 + 2]);
+}
+
+void update(int id, int L, int R, int i, int value){
+    if(R - L == 1){
+        mn[id] = value;
+        mx[id] = value;
+        return;
+    }
+    int m = (R + L) / 2;
+    if(i < m){ // LEFT
+        update(id * 2 + 1, L, m, i, value);
+    } else{
+        update(id * 2 + 2, m, R, i, value);
+    }
+    mx[id] = max(mx[id * 2 + 1], mx[id * 2 + 2]);
+    mn[id] = min(mn[id * 2 + 1], mn[id * 2 + 2]);
+}
+
+pair<int, int > getMxn(int id, int L, int R, int S_L, int S_R){  // <Max, Min>
+    if(S_R <= L || R <= S_L){
+        return {INF, -INF};
+    }
+    if(S_L <= L && R <= S_R){
+        return {mn[id], mx[id]};
+    }
+    int m = (R + L) / 2;
+    pair <int, int > left = getMxn(id * 2 + 1, L, m, S_L, S_R);
+    pair <int, int > right = getMxn(id * 2 + 2, m, R, S_L, S_R);
+    return {min(left.first, right.first), max(left.second, right.second)};
+}
+
+int x, y;
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    cin >> k;
+    fill(mn, mn + N - 1, INF);
+    fill(mx, mx + N - 1, INF);
+    for(int i = 1; i < N; ++i){
+        a[i] = ((i % 12345) * (i % 12345)) % 12345 + (((i % 23456) * (i % 23456)) % 23456 * (i % 23456)) % 23456;
+    }
+    build(0, 0, N);
+    for(int i = 0; i < k; ++i){
+        cin >> x >> y;
+        if(x > 0){
+            auto ans = getMxn(0, 0, N, x, y + 1);
+            cout << ans.second - ans.first << '\n';
+        } else {
+            update(0, 0, N, -x, y);
+        }
+    }
+}
+

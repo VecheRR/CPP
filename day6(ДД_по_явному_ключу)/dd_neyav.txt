@@ -1,0 +1,202 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+constexpr int INF = 1e9 + 13;
+typedef long long ll;
+
+struct node {
+    node *left, *right;
+    int value;
+    int sum;
+    int priority;
+    int size;
+    int promise;
+    int min;
+    bool reverse;
+
+    node(int new_value = 0) {
+        left = nullptr;
+        right = nullptr;
+        sum = new_value;
+        value = new_value;
+        size = 1;
+        min = new_value;
+        promise = 0;
+        priority = ((rand() << 15) | rand());
+        reverse = false;
+    }
+};
+
+void push (node *root) {
+    if (root == nullptr) {
+        return;
+    } else {
+        root->value += root->promise;
+        root->sum += root->promise * root->size;
+        if (root->reverse) {
+            swap (root->left, root->right);
+        }
+        if (root->left != nullptr) {
+            root->left->promise += root->promise;
+            root->left->reverse ^= root->reverse;
+        }
+        if (root->right != nullptr) {
+            root->right->promise += root->promise;
+            root->right->reverse ^= root->reverse;
+        }
+        root->promise = 0;
+        root->reverse = false;
+    }
+}
+
+int size (node *root) {
+    if (root == nullptr) {
+        return 0;
+    }
+    return root->size;
+}
+
+int sum (node *root) {
+    if (root == nullptr) {
+        return 0;
+    }
+    return root->sum;
+}
+
+void update (node *root) {
+    if (root == nullptr) {
+        return;
+    }
+    push(root->left);
+    push(root->right);
+    root->size = size(root->left) + size(root->right) + 1;
+    root->sum = f(root->left) + f(root->right) + root->value;
+}
+
+node *merge (node *root1, node *root2) {
+    push(root1);
+    push(root2);
+    if (root1 == nullptr) {
+        return root2;
+    }
+    if (root2 == nullptr) {
+        return root1;
+    }
+    if (root1->priority < root2->priority) {
+        root1->right = merge(root1->right, root2);
+        update(root1);
+        return root1;
+    } else {
+        root2->left = merge(root1, root2->left);
+        update(root2);
+        return root2;
+    }
+}
+
+pair <node *, node * > split (node *root, int k) {
+    if (root == nullptr) {
+        return {nullptr, nullptr};
+    } else {
+        push(root);
+        if (size(root->left) >= k) {
+            auto p = split(root->left, k);
+            root->left = p.second;
+            update(root);
+            return {p.first, root};
+        } else {
+            auto p = split(root->right, k - size(root->left) - 1);
+            root->right = p.first;
+            update(root);
+            return {root, p.second};
+        }
+    }
+}
+
+void write (node *root) {
+    if (root == nullptr) {
+        return;
+    }
+    push(root);
+    write(root->left);
+    cout << root->value << ' ';
+    write(root->right);
+}
+
+node *root = nullptr;
+
+int getSum (int l, int r) {
+    auto p1 = split(root, r + 1);
+    auto p2 = split(p1.first, l);
+    int ans = sum(p2.second);
+    root = merge(p2.first, p2.second);
+    root = merge(root, p1.second);
+    return ans;
+}
+
+void update_segment (int l, int r, int value) {
+    auto p1 = split(root, r + 1);
+    auto p2 = split(p1.first, l);
+    if (p2.second != nullptr) {
+        p2.second->promise += value;
+    }
+    root = merge(p2.first, p2.second);
+    root = merge(root, p1.second);
+}
+
+void reverse (int l, int r) {
+    auto p1 = split (root, r + 1);
+    auto p2 = split (p1.first, l);
+    if (p2.second != nullptr) {
+        p2.second->reverse = true;
+    }
+    root = merge(p2.first, p2.second);
+    root = merge(root, p1.second);
+}
+
+void add (int value) {
+    node *v = new node(value);
+    root = merge(root, v);
+}
+
+int f (node *root) {
+    if (root == nullptr) {
+        return INF;
+    }
+    return root->min;
+}
+
+int minLR (node *root, int l, int r) {
+    auto p1 = split (root, r + 1);
+    auto p2 = split (root, l);
+    int res = f(p2.second);
+    root = merge (p2.first, p2.second);
+    root = merge (root, p1.second);
+    return res;
+}
+
+void _add (node *root, int i, int value) {
+    auto p = split (root, i);
+    auto new_node = new node(value);
+    p.first = merge (p.first, new_node);
+    root = merge (p.first, p.second);
+}
+
+int main() {
+    int n;
+    scanf("%d%d", &n);
+    while (n--) {
+        char c;
+        scanf("%c", &c);
+        if (c == '?') {
+            int i, j;
+            scanf("%d%d", &i, &j);
+            cout << minLR(root, i, j) << '\n';
+        }
+        if (c == '+') {
+            int i, x;
+            scanf("%d%d", &i, &x);
+            _add(root, i, x);
+        }
+    }
+}

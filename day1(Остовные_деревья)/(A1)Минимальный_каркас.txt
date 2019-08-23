@@ -1,0 +1,50 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+//
+
+using namespace std;
+
+#define MAXV 20001
+#define MAXE 100001
+
+int mas[20001], sz[20001];
+int u, v, dist;
+
+struct Edge{
+    int u, v,dist;
+} e[100001];
+
+int Repr(int n){
+    if (n == mas[n]) return n;
+    return mas[n] = Repr(mas[n]);
+}
+
+int Union(int x,int y){
+    x = Repr(x); y = Repr(y);
+    if(x == y) return 0;
+    if (sz[x] < sz[y]) swap(x,y);
+    mas[y] = x;
+    sz[x] += sz[y];
+    return 1;
+}
+int lt(Edge a, Edge b){
+    return (a.dist < b.dist);
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, m;
+    cin >> n >> m;
+    for(int i = 1; i <= n; i++) mas[i] = i, sz[i] = 1;
+    for(int i = 0; i < m; i++) {
+        cin >> e[i].u >> e[i].v >> e[i].dist;
+    }
+    sort(e,e+m,lt);
+    int res = 0;
+    for(int i = 0; i < m; i++)
+        if (Union(e[i].u,e[i].v)) res += e[i].dist;
+            cout << res;
+}

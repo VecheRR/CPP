@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+
+const int INF = 1e9;
+
+const int N = 2013;
+int parent[N], sz[N];
+
+struct Edge {
+    int v, u, w;
+};
+
+bool inc_comp(Edge& e1, Edge& e2) {
+    return e1.w > e2.w;
+}
+
+int get(int v) {
+    if (parent[v] == v) {
+        return v;
+    }
+    parent[v] = get(parent[v]);
+    return parent[v];
+}
+
+bool merge(int u, int v) {
+    u = get(u); v = get(v);
+    if (u == v) return false;
+    if (sz[u] > sz[v]) {
+        swap(u, v);
+    }
+    parent[u] = v;
+    sz[v] += sz[u];
+    return true;
+}
+
+vector <Edge> edges;
+vector <vector <pair <int, int> > > gr(N);
+
+queue<int> q;
+vector<bool> used;
+vector<int> mins;
+
+int find_min(int v, int u) {
+    fill(used.begin(), used.end(), 0);
+    fill(mins.begin(), mins.end(), INF);
+    q.push(v);
+    used[v] = true;
+    while (!q.empty()) {
+        int v = q.front();
+        q.pop();
+        for (auto p : gr[v]) {
+            if (!used[p.first]) {
+                used[p.first] = true;
+                q.push(p.first);
+                mins[p.first] = min(mins[v], p.second);
+            }
+        }
+    }
+    return mins[u];
+}
+
+int n, m, k;
+int i, j, w;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> n >> m >> k;
+    for (int i = 0; i < n + 1; i++) {
+        parent[i] = i;
+    }
+    edges.resize(m);
+    used.resize(n);
+    mins.resize(n);
+    for (int e = 0; e < m; e++) {
+        cin >> i >> j >> w;
+        edges[e] = {i - 1, j - 1, w };
+    }
+    sort(edges.begin(), edges.end(), [](Edge e1, Edge e2){return e1.w > e2.w;});
+    for (auto e : edges) {
+        if (merge(e.u, e.v)) {
+            gr[e.u].push_back({ e.v, e.w });
+            gr[e.v].push_back({ e.u, e.w });
+        }
+    }
+    while (k--) {
+        cin >> i >> j;
+        cout << find_min(--i, --j) << '\n';
+    }
+}

@@ -1,0 +1,50 @@
+#include <iostream>
+#include <cstdio>
+#include <utility>//
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+const int INF = 1e9 + 13;
+typedef long long ll;
+
+pair<int, int> coords[5013];
+bool used[5013];
+vector <double > dist(5013, INF);
+int n;
+int x, y;
+double ans = 0;
+
+double calc_dis(pair <int, int> a, pair <int, int> b) {
+    return sqrt((a.first - b.first)* (a.first - b.first) + (a.second - b.second) * (a.second - b.second));
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> x >> y;
+        coords[i] = { x, y };
+    }
+    dist[0] = 0.0;
+    for (int i = 0; i < n; i++) {
+        int v = -1;
+        for (int j = 0; j < n; j++) {
+            if (!used[j] && (v == -1 || dist[v] > dist[j])) {
+                v = j;
+            }
+        }
+        used[v] = true;
+        ans += dist[v];
+        for (int j = 0; j < n; j++) {
+            double distance = calc_dis(coords[j], coords[v]);
+            if (distance < dist[j]) {
+                dist[j] = distance;
+            }
+        }
+    }
+    printf("%.10f\n", ans);
+}
+

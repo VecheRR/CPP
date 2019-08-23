@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+constexpr int N = 100013;
+const ll INF = INT32_MAX;
+
+struct s {
+    ll l, r, q;
+};
+
+inline bool operator <(s &a, s &b) {
+    return a.q < b.q;
+}
+vector <s > arr(N);
+vector <ll > mn(4 * N), prom(4 * N);
+
+void push(ll id, ll l, ll r) {
+    if (prom[id] == INF) {
+        return;
+    }
+    mn[id] = prom[id];
+    if (r - l > 1) {
+        prom[id * 2 + 1] = prom[id];
+        prom[id * 2 + 2] = prom[id];
+    }
+    prom[id] = INF;
+}
+
+void update(ll id, ll l, ll r, ll S_L, ll S_R, ll v) {
+    push(id, l, r);
+    if (S_R <= l || S_L >= r) {
+        return;
+    }
+    if (S_L <= l && S_R >= r) {
+        prom[id] = v;
+        push(id, l, r);
+        return;
+    }
+    ll m = (l + r) / 2;
+    update(id * 2 + 1, l, m, S_L, S_R, v);
+    update(id * 2 + 2, m, r, S_L, S_R, v);
+    mn[id] = min(mn[id * 2 + 1], mn[id * 2 + 2]);
+}
+
+ll get_min(ll id, ll l, ll r, ll S_L, ll S_R) {
+    push(id, l, r);
+    if (S_R <= l || S_L >= r) {
+        return INF;
+    }
+    if (S_L <= l && S_R >= r) {
+        return mn[id];
+    }
+    ll m = (l + r) / 2;
+    return min(get_min(id * 2 + 1, l, m, S_L, S_R), get_min(id * 2 + 2, m, r, S_L, S_R));
+}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    ll n, m;
+    cin >> n >> m;
+    for (int i = 0; i < m; i++) {
+        cin >> arr[i].l >> arr[i].r >> arr[i].q;
+        if (arr[i].l > arr[i].r) {
+            swap(arr[i].l, arr[i].r);
+        }
+        --arr[i].l;
+        --arr[i].r;
+    }
+    fill(mn.begin(), mn.begin() + n * 4, INF);
+    fill(prom.begin(), prom.begin() + n * 4, INF);
+    sort(arr.begin(), arr.begin() + m);
+    for (int i = 0; i < m; i++) {
+        update(0, 0, n, arr[i].l, arr[i].r + 1, arr[i].q);
+    }
+    for (int i = 0; i < m; i++) {
+        if (get_min(0, 0, n, arr[i].l, arr[i].r + 1) != arr[i].q) {
+            cout << "inconsistent\n";
+            return 0;
+        }
+    }
+    cout << "consistent\n";
+    for (int i = 0; i < n; i++) {
+        cout << get_min(0, 0, n, i, i + 1) << ' ';
+    }
+    cout << '\n';
+}

@@ -1,0 +1,37 @@
+#include <iostream>
+#include <vector>
+#include <set>
+
+using namespace std;
+using GraphP = vector <vector <pair <int, int > > >;
+using Vec = vector <int >;
+using SetP = set <pair <int, int > >;
+using Set = set <int >;
+
+constexpr int INF = 1e9 + 13;
+
+int n;
+
+int main(){
+    scanf("%d", &n);
+    Set st;
+    for(int i = 1; i <= 1e6; ++i){
+        st.insert(i);
+    }
+    while(n--){
+        int x;
+        cin >> x;
+        if(x > 0){
+            if(st.find(x) != st.end()){
+                cout << x << '\n';
+                st.erase(x);
+            } else {
+                auto id = st.upper_bound(x);
+                cout << *id << '\n';
+                st.erase(*id);
+            }
+        } else {
+            st.insert(-x);
+        }
+    }
+}

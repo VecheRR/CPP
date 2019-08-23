@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+constexpr int MAXN = 2e5 + 13;
+// constexpr int MAXM = 2e6 + 13;
+
+vector <bool > used(MAXN, false);
+vector <int > ans;
+vector <vector <pair <int, int > > > gr(MAXN);
+vector <int > tin(MAXN), up(MAXN);
+int timer = 1;
+
+void dfs(int v, int p){
+    used[v] = true;
+    tin[v] = timer++;
+    up[v] = tin[v];
+    for(auto e : gr[v]){
+        auto u = e.first;
+        if(u == p){
+            continue;
+        }
+        if(used[u]){
+            up[v] = min(up[v], tin[u]);
+        } else {
+            dfs(u, v);
+            up[v] = min(up[v], up[u]);
+            if(up[u] == tin[u]){
+                ans.push_back(e.second);
+            }
+        }
+    }
+}
+
+int n, m;
+int u, v;
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    cin >> n >> m;
+    for(int i = 1; i <= m; ++i){
+        cin >> u >> v;
+        gr[u].push_back({v, i});
+        gr[v].push_back({u, i});
+    }
+    for(int i = 1; i <= n; ++i){
+        if(!used[i]){
+            dfs(i, -1);
+        }
+    }
+    cout << ans.size() << '\n';
+    sort(ans.begin(), ans.end());
+    for(auto t : ans){
+        cout << t << ' ';
+    }
+}

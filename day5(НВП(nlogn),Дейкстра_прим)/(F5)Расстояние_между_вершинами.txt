@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+#include <set>
+
+using namespace std;
+using GraphP = vector <vector <pair <int, int > > >;
+using Vec = vector <int >;
+using SetP = set <pair <int, int > >;
+using Set = set <int >;
+
+constexpr int INF = 1e9 + 13;
+
+int n, m;
+int s, f;
+int u, v, w;
+
+int main(){
+    cin >> n >> m;
+    cin >> s >> f;
+    GraphP gr(n + 1);
+    Vec dist(n + 1, INF);
+    for(int i = 0; i < m; ++i){
+        cin >> u >> v >> w;
+        gr[u].push_back({v, w});
+        gr[v].push_back({u, w});
+    }
+    dist[s] = 0;
+    SetP st;
+    st.insert({0, s});
+    while(!st.empty()){
+        int v = st.begin()->second;
+        st.erase(st.begin());
+        for(auto p : gr[v]){
+            if(dist[p.first] > dist[v] + p.second){
+                st.erase({dist[p.first], p.first});
+                dist[p.first] = dist[v] + p.second;
+                st.insert({dist[p.first], p.first});
+            }
+        }
+    }
+    cout << ((dist[f] == INF) ? -1 : dist[f]);
+}
+

@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+
+using namespace std;
+
+constexpr int MAXN = 1e5 + 13;
+
+vector<vector<int> > g, gr;
+
+vector<int> used, top, color;
+
+set<pair<int,int> > s;
+
+void dfs1(int v) {
+    int i, to;
+    used[v] = 1;
+    for (i = 0; i < g[v].size(); i++) {
+        to = g[v][i];
+        if (!used[to]) dfs1(to);
+    }
+    top.push_back(v);
+}
+
+void dfs2(int v, int c) {
+    int i, to;
+    color[v] = c;
+    for (i = 0; i < gr[v].size(); i++) {
+        to = gr[v][i];
+        if (color[to] == -1) dfs2(to, c);
+    }
+}
+
+
+int main(){
+    int n, m, u, v;
+    cin >> n >> m;
+    g.resize(n + 1,vector <int > (0));
+    gr.resize(n + 1,vector <int > (0));
+    for(int i = 0; i < m; i++){
+        cin >> u >> v;
+        g[u].push_back(v); 
+        gr[v].push_back(u);
+    }
+    used.resize(n + 1,0);
+    for(int i = 1; i <= n; i++) {
+        if (!used[i]) dfs1(i);
+    }
+    color.assign(n+1,-1);
+    for(int c = 0, i = 1; i <= n; i++) {
+        int v = top[n - i];
+        if (color[v] == -1) dfs2(v, c++);
+    }
+    for(int i = 1; i < g.size(); i++)
+        for(int j = 0; j < g[i].size(); j++) {
+            int to = g[i][j];
+            if (color[i] != color[to])
+                s.insert(make_pair(color[i], color[to]));
+        }
+    cout << s.size();
+}

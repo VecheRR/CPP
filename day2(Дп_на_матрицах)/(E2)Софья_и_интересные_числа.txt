@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+constexpr int N = 113;
+
+const ll mod = 1e9 + 7;
+ll dp[N][13];
+
+bool can(string s) {
+    for (int i = 1; i < s.length(); i++) {
+        if (s[i] < s[i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ll rec(int pos, string num) {
+    ll dp_pos = num.length() - pos - 1;
+    if (dp_pos == -1) {
+        return 1;
+    }
+    ll nm, prev;
+    nm = num[pos] - '0';
+    prev = (pos == 0 ? 1 : num[pos - 1] - '0');
+    if (prev > nm) {
+        return 0;
+    }
+    return ((dp[dp_pos][nm - 1] - dp[dp_pos][prev - 1] + mod) % mod + rec(pos + 1, num)) % mod;
+}
+
+ll f(string number) {
+    int n = number.length();
+    ll res = 0;
+    for (int i = 0; i < n - 1; i++) {
+        res = (res + dp[i][9]) % mod;
+    }
+    res = (res + rec(0, number)) % mod;
+    return res;
+}
+
+int main() {
+    string sl, sr;
+    cin >> sl >> sr;
+    int l = sl.size(), r = sr.size();
+    for (int i = 1; i < 10; i++) {
+        dp[0][i] = dp[0][i - 1] + 1;
+    }
+    for (int i = 1; i <= r; i++) {
+        for (int j = 1; j < 10; j++) {
+            dp[i][j] = dp[i - 1][9] - dp[i - 1][j - 1];
+            dp[i][j] = (dp[i][j] + mod) % mod;
+            dp[i][j] = (dp[i][j] + dp[i][j - 1]) % mod;
+        }
+    }
+    ll r1 = f(sr), l1 = f(sl);
+    ll ans = (r1 - l1 + mod) % mod + can(sl);
+    cout << ans;
+}

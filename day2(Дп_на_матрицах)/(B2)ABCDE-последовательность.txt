@@ -1,0 +1,84 @@
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+typedef long long int ll;
+
+const ll mod = 999999937;
+
+void _fill(vector< vector<ll> >& arr) {
+    for (auto &v : arr) {
+        fill(v.begin(), v.end(), 0);
+    }
+}
+
+void mul(vector< vector<ll> > &a, vector< vector<ll> > &b, vector< vector <ll> > &c) {
+    int n = a.size(), m = b.size(), k = b[0].size();
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < k; ++j) {
+            for (int q = 0; q < m; ++q) {
+                c[i][j] = (c[i][j] + (a[i][q] * b[q][j]) % mod) % mod;
+            }
+        }
+    }
+}
+
+vector< vector <ll> > binpow(vector< vector<ll> > &arr, ll pow) {
+    int n = arr.size();
+    vector < vector <ll> > res(n, vector <ll>(n));
+    if (pow == 0) {
+        for (int i = 0; i < n; i++) {
+            res[i][i] = 1;
+        }
+        return res;
+    }
+    if (pow % 2 == 1) {
+        auto b = binpow(arr, pow - 1);
+        mul(b, arr, res);
+    } else {
+        auto b = binpow(arr, pow / 2);
+        int size1 = b.size(), size2 = b[0].size();
+        mul(b, b, res);
+    }
+    return res;
+}
+
+ll sum(vector< vector<ll> > &arr) {
+    int n = arr.size(), m = arr[0].size();
+    ll res = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            res = (res + arr[i][j]) % mod;
+        }
+    }
+    return res;
+}
+
+int main() {
+    ll n;
+    vector<vector<ll> > step = {
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1},
+            {1, 1, 0, 1, 0},
+            {1, 1, 0, 1, 0}
+    };
+    vector<vector<ll> > base = {
+            {1},
+            {1},
+            {1},
+            {1},
+            {1}
+    };
+    vector<vector<ll> > res(5, vector<ll>(1));
+
+    while (cin >> n) {
+        if (n == 0) break;
+        --n;
+        auto n_step = binpow(step, n);
+        _fill(res);
+        mul(n_step, base, res);
+        cout << sum(res) << '\n';
+    }
+}

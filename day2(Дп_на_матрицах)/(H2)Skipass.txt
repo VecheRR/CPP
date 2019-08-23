@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <vector>
+#include <iostream>
+using namespace std;
+
+typedef long long int ll;
+
+const ll mod = 1000000007;
+
+void mul(vector< vector<ll> > &a, vector< vector<ll> > &b, vector< vector <ll> > &c) {
+    for (int i = 0; i < a.size(); ++i) {
+        for (int j = 0; j < b[0].size(); ++j) {
+            for (int q = 0; q < b.size(); ++q) {
+                c[i][j] = (c[i][j] + (a[i][q] * b[q][j]) % mod) % mod;
+            }
+        }
+    }
+}
+
+vector< vector <ll> > binpow(vector< vector<ll> > &arr, ll pow) {
+    int n = arr.size();
+    vector < vector <ll> > res(n, vector <ll>(n));
+    if (pow == 0) {
+        for (int i = 0; i < n; i++) {
+            res[i][i] = 1;
+        }
+        return res;
+    }
+    if (pow % 2 == 1) {
+        auto b = binpow(arr, pow - 1);
+        mul(b, arr, res);
+    } else {
+        auto b = binpow(arr, pow / 2);
+        int size1 = b.size(), size2 = b[0].size();
+        mul(b, b, res);
+    }
+    return res;
+}
+
+int u, v;
+int n, m, k;
+
+int main() {
+    cin >> n >> m >> k;
+    vector<vector<ll> > gr(n, vector<ll>(n));
+    for (int i = 0; i < m; i++) {
+        cin >> u >> v;
+        gr[u - 1][v - 1]++;
+    }
+    auto path = binpow(gr, k);
+    ll res = 0;
+    for (int i = 0; i < n; i++) {
+        res = (res + path[0][i]) % mod;
+    }
+    cout << res;
+}

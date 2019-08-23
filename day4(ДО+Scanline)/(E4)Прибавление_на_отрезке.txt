@@ -1,0 +1,83 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+constexpr long long N = 100013;
+vector <long long > a(N), max_tree(N * 4), prom(N * 4);
+
+const long long inf = 1e9 + 13;
+
+void build(long long id, long long l, long long r) {
+    if (r - l == 1) {
+        max_tree[id] = a[l];
+        return;
+    }
+    long long m = (l + r) / 2;
+    build(id * 2 + 1, l, m);
+    build(id * 2 + 2, m, r);
+    max_tree[id] = max(max_tree[id * 2 + 1], max_tree[id * 2 + 2]);
+}
+
+void push(long long id, long long l, long long r) {
+    if (prom[id] == -inf) return;
+    max_tree[id] += prom[id];
+    if (r - l > 1) {
+        if (prom[id * 2 + 1] == -inf) prom[id * 2 + 1] = prom[id];
+        else prom[id * 2 + 1] += prom[id];
+        if (prom[id * 2 + 2] == -inf) prom[id * 2 + 2] = prom[id];
+        else prom[id * 2 + 2] += prom[id];
+    }
+    prom[id] = -inf;
+}
+
+long long get_max(long long id, long long l, long long r, long long sl, long long sr) {
+    push(id, l, r);
+    if (sr <= l || sl >= r) {
+        return -inf;
+    }
+    if (sl <= l && sr >= r) {
+        return max_tree[id];
+    }
+    long long m = (l + r) / 2;
+    return max(get_max(id * 2 + 1, l, m, sl, sr), get_max(id * 2 + 2, m, r, sl, sr));
+}
+
+void update_segment(long long id, long long l, long long r, long long sl, long long sr, long long d) {
+    push(id, l, r);
+    if (sr <= l || sl >= r) {
+        return;
+    }
+    if (sl <= l && r <= sr) {
+        if (prom[id] == -inf) prom[id] = d;
+        else prom[id] += d;
+        push(id, l, r);
+        return;
+    }
+    long long m = (l + r) / 2;
+    update_segment(id * 2 + 1, l, m, sl, sr, d);
+    update_segment(id * 2 + 2, m, r, sl, sr, d);
+    max_tree[id] = max(max_tree[id * 2 + 1], max_tree[id * 2 + 2]);
+}
+
+int main() {
+    long long n, m;
+    cin >> n;
+    for (long long i = 0; i < n; i++) cin >> a[i];
+    build(0, 0, n);
+    cin >> m;
+    vector <long long > ans;
+    char type;
+    long long l, r, val;
+    while (m--) {
+        cin >> type >> l >> r;
+        if (type == 'm') ans.push_back(get_max(0, 0, n, l - 1, r));
+        else {
+            cin >> val;
+            update_segment(0, 0, n, l - 1, r, val);
+        }
+    }
+    for(auto t : ans){
+        cout << t << ' ';
+    }
+}

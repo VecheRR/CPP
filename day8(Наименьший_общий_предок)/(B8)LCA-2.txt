@@ -1,0 +1,66 @@
+#include <bits/stdc++.h> 
+
+#define ll long long 
+
+using namespace std; 
+
+vector<vector<ll>> gr; 
+vector<ll> tin, tout; ll timer = 0; 
+vector<vector<ll>> dp; 
+void dfs (ll v, ll p = 0) {
+    tin[v] = timer++;
+    dp[v][0] = p;
+    for (ll i = 1; i < dp[v].size() - 1; ++i)
+        dp[v][i] = dp[dp[v][i - 1]][i - 1];
+    for (ll i = 0; i < gr[v].size(); ++i) {
+        if (gr[v][i] != p)
+            dfs(gr[v][i], v);
+    }
+    tout[v] = timer++;
+} 
+bool check (ll a, ll b) { 
+    return tin[a] <= tin[b] && tout[a] >= tout[b]; 
+} 
+ll lca(ll a, ll b) {
+    if (check(a, b)) return a;
+    if (check(b, a)) return b;
+    for (ll i = 29; i >= 0; i--)
+        if (!check(dp[b][i], a))
+            b = dp[b][i];
+    return dp[b][0];
+}
+
+ll k, s = 0;
+ll counter = 0;
+ll n, m;
+ll a, b, x, y, z;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> n >> m;
+    tin.resize(n);
+    tout.resize(n);
+    dp.resize(n, vector<ll>(30));
+    gr.resize(n);
+    for (ll i = 1; i < n; i++) {
+        ll a;
+        cin >> a;
+        gr[i].push_back(a);
+        gr[a].push_back(i);
+    }
+    dfs(0);
+    cin >> a >> b >> x >> y >> z;
+    ll p = (x * a + y * b + z) % n, q = (x * b + y * p + z) % n;
+    for (ll i = 0; i < m; i++) {
+        k = lca((a + s) % n, b);
+        counter += k;
+        p = (x * a + y * b + z) % n;
+        q = (x * b + y * p + z) % n;
+        a = p;
+        b = q;
+        s = k;
+    }
+    cout << counter;
+}

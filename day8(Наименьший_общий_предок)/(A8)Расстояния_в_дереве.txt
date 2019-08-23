@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using Vec = vector <int >;
+using Graph = vector<Vec >;
+
+constexpr int N = 1e5+13;
+
+Graph gr(N);
+vector <int > tin(N), tout(N), d(N);
+
+int dp[N][30];
+int timer = 0;
+
+bool check(int u, int v) {
+    return (tin[u] <= tin[v] && tout[u] >= tout[v]);
+}
+
+int lca(int v, int u) {
+    if (check(v, u)) {
+        return v;
+    }
+    if (check(u, v)) {
+        return u;
+    }
+    for (int i = 29; i >= 0; --i) {
+        if (!check(dp[u][i], v)) {
+            u = dp[u][i];
+        }
+    }
+    return dp[u][0];
+}
+
+void dfs(int v, int par) {
+    if (v != par) {
+        d[v] = d[par] + 1;
+    }
+    tin[v] = timer++;
+    dp[v][0] = par;
+    for (int i = 1; i < 30; ++i) {
+        dp[v][i] = dp[dp[v][i - 1]][i - 1];
+    }
+    for (auto u : gr[v]) {
+        if (u != par) {
+            dfs(u, v);
+        }
+    }
+    tout[v] = timer++;
+}
+
+
+int n, m;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    cin >> n;
+    int u, v;
+    for (int i = 0; i < n - 1; i++) {
+        cin >> u >> v;
+        gr[u - 1].push_back(v - 1);
+        gr[v - 1].push_back(u - 1);
+    }
+    dfs(0, 0);
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+        cin >> u >> v;
+        --u;
+        --v;
+        int p = lca(u, v);
+        cout << d[u] + d[v] - 2 * d[p] << '\n';
+    }
+}

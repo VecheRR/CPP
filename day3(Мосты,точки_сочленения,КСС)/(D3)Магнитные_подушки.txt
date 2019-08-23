@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+#pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,tune=native")
+
+using namespace std;
+using Graph = vector <int>;
+
+typedef long long ll;
+typedef long double ld;
+
+template <typename T> inline T sqr (const T &a) {return a * a;}
+template <typename T> inline T abs (const T &a) {return a < 0 ? -a : a;}
+
+constexpr int MAX = 1e6 + 13;
+
+Graph gr[MAX];
+
+vector <int > used(MAX, 0), tin(MAX, 0), up(MAX, 0), a(MAX, 0);
+int n, m, v1, v2, v3, cnt = 0, timer = 1;
+bool f = false;
+
+void dfs (int v, int p = -1) {
+    used[v] = 1;
+    up[v] = timer++;
+    tin[v] = timer - 1;
+    int child_cnt = 0;
+    for (auto u : gr[v]) {
+        if (u == p) {
+            continue;
+        }
+        if (used[u]){
+            up[v] = min(up[v], tin[u]);
+        }
+        else {
+            dfs(u, v);
+            up[v] = min(up[v], up[u]);
+            if ((up[u] >= tin[v]) && (p != -1)) {
+                a[v] = 1;
+            }
+            ++child_cnt;
+        }
+    }
+    if ((p == -1) && (child_cnt >= 2)) {
+        a[v] = 1;
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    for (int i = 1; i <= m; ++i) {
+        cin >> v1 >> v2 >> v3;
+        gr[n + i].push_back(v1);gr[v1].push_back(n + i);
+        gr[n + i].push_back(v2);gr[v2].push_back(n + i);
+        gr[n + i].push_back(v3);gr[v3].push_back(n + i);
+    }
+    for (int i = 1; i <= n + m; i++) {
+        if (!used[i]) {
+            dfs(i);
+        }
+    }
+    for (int i = n + 1; i <= n + m; i++) {
+        if (a[i]) {
+            ++cnt;
+        }
+    }
+    cout << cnt << '\n';
+    if(!cnt){
+        return 0;
+    }
+    for (int i = 1; i <= m; ++i) {
+        if (a[n + i]) {
+            cout << i << ' ';
+            f = true;
+        }
+    }
+}
+//E -  1) удаляем все мосты 2) считаем количество компонент связности 3) Ответ: кол-во компонент-1

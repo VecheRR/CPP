@@ -1,0 +1,90 @@
+#include <iostream>
+#include <vector>//
+#include <set>
+#include <algorithm>
+
+using namespace std;
+
+constexpr int MAXN = 2 * 1e5;
+
+int par[MAXN], sz[MAXN];
+
+int get(int n){
+    if (n == par[n]) return n;
+    return get(par[n]);
+}
+
+void Union(int x,int y){
+    x = get(x); y = get(y);
+    if(x == y) return;
+    if (sz[x] < sz[y]) swap(x,y);
+    par[y] = x;
+    sz[x] += sz[y];
+}
+
+struct jopa{
+    string s;
+    int u;
+    int v;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int n, m, k;
+    int u, v;
+    cin >> n >> m >> k;
+    for(int i = 1; i <= n; ++i){
+        sz[i] = i;
+        par[i] = i;
+    }
+    for(int i = 1; i <= m; ++i){
+        cin >> u >> v;
+        //Union(u, v);
+    }
+    string s;
+
+    vector <jopa > vec;
+
+    for(int i = 0; i < k; ++i){
+        cin >> s >> u >> v;
+        vec.push_back({s, u, v});
+//        cout << vec[i].s << ' ' << vec[i].u << ' ' << vec[i].v << '\n';
+    }
+
+    vector <string > ans;
+    for(int i = k - 1; i >= 0; --i){
+        //cout << vec[i].s << ' ' << vec[i].u << ' ' << vec[i].v << '\n';
+        if(vec[i].s == "cut"){
+            Union(vec[i].u, vec[i].v);
+        } else {
+            if(vec[i].s == "ask"){
+                if(get(vec[i].u) == get(vec[i].v)){
+                    ans.push_back("YES\n");
+                    //cout << "YES\n";
+                } else {
+                    ans.push_back("NO\n");
+                    //cout << "NO\n";
+                }
+            }
+        }
+    }
+
+    for(int i = ans.size() - 1; i >= 0; --i){
+        cout << ans[i];
+    }
+
+    /*
+     * if(s == "cut"){
+            Union(u, v);
+        } else {
+            if(s == "ask"){
+                if(get(u) == get(v)){
+                    cout << "YES\n";
+                } else {
+                    cout << "NO\n";
+                }
+            }
+        }
+     */
+}

@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <vector>
+#include <string.h>
+#include <iostream>
+using namespace std;
+
+typedef long long int LL;
+typedef signed short int SSI;
+
+void _fill(vector< vector<LL> >& arr) {
+    for (auto &v : arr) {
+        fill(v.begin(), v.end(), 0);
+    }
+}
+
+void mul(vector< vector<LL> > &a, vector< vector<LL> > &b, vector< vector <LL> > &c, int MOD) {
+    int n = a.size(), m = b.size(), k = b[0].size();
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < k; ++j) {
+            for (int q = 0; q < m; ++q) {
+                c[i][j] = (c[i][j] + (a[i][q] * b[q][j]) % MOD) % MOD;
+            }
+        }
+    }
+}
+
+vector< vector <LL> > binpow(vector< vector<LL> > &arr, LL pow, int MOD) {
+    int n = arr.size();
+    vector < vector <LL> > res(n, vector <LL>(n));
+    if (pow == 0) {
+        for (int i = 0; i < n; i++) {
+            res[i][i] = 1;
+        }
+        return res;
+    }
+    if (pow % 2) {
+        auto b = binpow(arr, pow - 1, MOD);
+        mul(b, arr, res, MOD);
+    } else {
+        auto b = binpow(arr, pow / 2, MOD);
+        mul(b, b, res, MOD);
+    }
+    return res;
+}
+
+LL sum(vector< vector<LL> > &arr, int MOD) {
+    int n = arr.size(), m = arr[0].size();
+    LL res = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            res = (res + arr[i][j]) % MOD;
+        }
+    }
+    return res;
+}
+
+int main() {
+    LL n;
+    SSI l, r, T;
+    int MOD;
+    cin >> T;
+
+    vector<vector<LL> > step(10, vector<LL>(10));
+    vector<vector<LL> > base = {
+            {0},
+            {1},
+            {1},
+            {1},
+            {1},
+            {1},
+            {1},
+            {1},
+            {1},
+            {1}
+    };
+    vector<vector<LL> > res(10, vector<LL>(1));
+
+    while (T--) {
+        _fill(step);
+        _fill(res);
+        cin >> n >> l >> r >> MOD;
+        --n;
+        for (int i = 0; i < 10; i++) {
+            for (int d = l; d <= r; d++) {
+                if (i - d >= 0) step[i][i - d] = 1;
+                if (i + d < 10) step[i][i + d] = 1;
+            }
+        }
+        auto n_steps = binpow(step, n, MOD);
+        mul(n_steps, base, res, MOD);
+        cout << sum(res, MOD) << '\n';
+    }
+}
